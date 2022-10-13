@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.pip-audit-cache/
+.bash_history
+.local/
+.python_history
+
