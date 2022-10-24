@@ -28,7 +28,6 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        ./scripts/version.sh
         python3 -m build --sdist
         python3 -m build --wheel
         twine check dist/*
