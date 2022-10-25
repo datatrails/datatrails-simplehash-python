@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10" ]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11" ]
 
     steps:
     - uses: actions/checkout@v2
@@ -37,3 +37,7 @@ jobs:
             exit 1
         fi
         ./scripts/unittests.sh
+        rm -f coverage.xml
+        rm -rf htmlcov
+        coverage run --branch --source rkvst_simplehash -m unittest -v
+
