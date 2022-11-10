@@ -78,16 +78,17 @@ def list_events(start_time, end_time, auth_token):
             ArchivistBadFieldError: field has incorrect value.
         """
 
-        url = "https://app.rkvst.io/archivist/v2/assets/-/events"
+        url = "https://app.dev-jgough-0.wild.jitsuin.io/archivist/v2/assets/-/events"
         params = {
-            "proof_mechanism": "SIMPLEHASH",
-            "start_time": start_time,
-            "end_time": end_time,
+            "proof_mechanism": "SIMPLE_HASH",
+            "timestamp_accepted_since": start_time,
+            "timestamp_accepted_before": end_time,
             "page_size": 10,
             "order_by": "SIMPLEHASHV1"
         }
         headers = {
-            "Authorization", f"Bearer {auth_token}"
+            'Content-Type':'application/json',
+            "Authorization": f"Bearer {auth_token}"
         }
 
         while True:
@@ -120,7 +121,7 @@ def hash_events(start_time, end_time, auth_token):
         __check_event(event)
         redacted_event = redact_event(event)
 
-        # bencode the events which produces the canonical form
+        # bencode the events, this orders dictionary keys
         bencoded_event = binary_encode(redacted_event)
 
         # add the event to the sha256 hash
