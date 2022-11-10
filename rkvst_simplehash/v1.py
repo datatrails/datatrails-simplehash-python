@@ -78,7 +78,10 @@ def list_events(start_time, end_time, auth_token):
             ArchivistBadFieldError: field has incorrect value.
         """
 
-        url = "https://app.dev-jgough-0.wild.jitsuin.io/archivist/v2/assets/-/events"
+        #fqdn = "app.rkvst.io"
+        fqdn = "app.dev-jgough-0.wild.jitsuin.io"
+
+        url = f"https://{fqdn}/archivist/v2/assets/-/events"
         params = {
             "proof_mechanism": "SIMPLE_HASH",
             "timestamp_accepted_since": start_time,
