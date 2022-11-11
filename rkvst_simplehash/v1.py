@@ -10,6 +10,7 @@ from sys import stdin as sys_stdin
 from bencodepy import encode as binary_encode
 
 import requests
+import argparse
 
 V1_FIELDS = {
     "identity",
@@ -135,10 +136,20 @@ def hash_events(start_time, end_time, auth_token):
 
 
 def main():
-    """Reads the response fom the ListEvents query stdin"""
+    """Creates an anchor given the start time, end time and auth token"""
 
-    events_hash = hash_events(json_load(sys_stdin))
-    print("SimpleHash", events_hash)
+    parser = argparse.ArgumentParser(description="Create simple hash anchor.")
+
+    parser.add_argument("--start-time", type=str, help="the start time of the time window to anchor events, formatted as an rfc3339 formatted datetime string.")
+    parser.add_argument("--end-time", type=str, help="the end time of the time window to anchor events, formatted as an rfc3339 formatted datetime string.")
+    parser.add_argument("--auth-token-file", type=str, help="filepath to the stored auth token within a file")
+
+    args = parser.parse_args()
+
+    with open(args.auth_token_file) as file:
+        auth_token = str(file.read()).strip('\n')
+        anchor = hash_events(args.start_time, args.end_time, auth_token)
+        print(anchor)
 
 
 if __name__ == "__main__":  # pragma: no cover
