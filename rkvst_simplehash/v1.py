@@ -30,6 +30,8 @@ V1_FIELDS = {
 }
 
 
+class SimpleHashClientAuthError(Exception):
+    """If either client id or secret, or both are missing"""
 class SimpleHashFieldError(Exception):
     """Incorrect field name in list() method"""
 
@@ -62,7 +64,7 @@ def redact_event(event):
     return  {k: event[k] for k in V1_FIELDS}
 
 
-def list_events(start_time, end_time, auth_token):
+def list_events(start_time, end_time, fqdn, auth_token):
         """GET method (REST) with params string
         Lists events that match the params dictionary.
         If page size is specified return the list of records in batches of page_size
@@ -79,8 +81,6 @@ def list_events(start_time, end_time, auth_token):
             ArchivistBadFieldError: field has incorrect value.
         """
 
-        #fqdn = "app.rkvst.io"
-        fqdn = "app.dev-jgough-0.wild.jitsuin.io"
 
         url = f"https://{fqdn}/archivist/v2/assets/-/events"
         params = {
@@ -114,13 +114,13 @@ def list_events(start_time, end_time, auth_token):
             params = {"page_token": page_token}
 
 
-def hash_events(start_time, end_time, auth_token):
+def anchor_events(start_time, end_time, fqdn, auth_token):
     """Generate Simplehash for a given set of events canonicalizing then hashing"""
 
     hasher = sha256()
 
     # for each event
-    for event in list_events(start_time, end_time, auth_token):
+    for event in list_events(start_time, end_time, fqdn, auth_token):
 
         __check_event(event)
 
@@ -137,6 +137,25 @@ def hash_events(start_time, end_time, auth_token):
     return hasher.hexdigest()
 
 
+def get_auth_token(fqdn, client_id, client_secret):
+    """
+    get_auth_token gets an auth token from an app registration, given its client id and secret
+    """
+
+    url = f"https://{fqdn}/archivist/iam/v1/appidp/token"
+    params = {
+        "grant_type": "client_credentials",
+        "client_id": client_id,
+        "client_secret": client_secret,
+    }
+
+    response = requests.post(url, data=params)
+    data = response.json()
+
+    auth_token = data["access_token"]
+    return auth_token
+
+
 def main():
     """Creates an anchor given the start time, end time and auth token"""
 
@@ -144,15 +163,43 @@ def main():
 
     parser.add_argument("--start-time", type=str, help="the start time of the time window to anchor events, formatted as an rfc3339 formatted datetime string.")
     parser.add_argument("--end-time", type=str, help="the end time of the time window to anchor events, formatted as an rfc3339 formatted datetime string.")
+
+    parser.add_argument("--fqdn", type=str, help="the fqdn for the url to list the events in the anchor time window", default="app.rkvst.io")
+
+    # auth
     parser.add_argument("--auth-token-file", type=str, help="filepath to the stored auth token within a file")
 
+    # client id + secret auth
+    parser.add_argument("--client-id", type=str, help="client id for an app registration to gain auth, ignored if --auth-token-file is set")
+    parser.add_argument("--client-secret-file", type=str, help="filepath to the stored client secret for an app registration to gain auth, ignred if --auth-token-file is set")
     args = parser.parse_args()
 
-    with open(args.auth_token_file) as file:
-        auth_token = str(file.read()).strip('\n')
-        anchor = hash_events(args.start_time, args.end_time, auth_token)
-        print(anchor)
+    if args.auth_token_file:
+        with open(args.auth_token_file) as file:
 
+            # get auth token
+            auth_token = str(file.read()).strip('\n')
+
+
+            anchor = anchor_events(args.start_time, args.end_time, args.fqdn, auth_token)
+            print(anchor)
+            return
+
+    if args.client_id == "" or args.client_secret_file == "":
+        raise SimpleHashClientAuthError("'--client-id' and '--client-secret-file' need to be set.")
+
+    # we don't have the auth token file, but we have a client id and secret
+    #  so attempt to get the auth token via client id and secret
+    with open(args.client_secret_file) as file:
+
+        # get auth token
+        client_secret = str(file.read()).strip('\n')
+        auth_token = get_auth_token(args.fqdn, args.client_id, client_secret)
+
+
+        anchor = anchor_events(args.start_time, args.end_time, args.fqdn, auth_token)
+        print(anchor)
+        return
 
 if __name__ == "__main__":  # pragma: no cover
     main()
