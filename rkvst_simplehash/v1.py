@@ -185,7 +185,7 @@ def main():
             print(anchor)
             return
 
-    if args.client_id == "" or args.client_secret_file == "":
+    if args.client_id is None or args.client_secret_file is None:
         raise SimpleHashClientAuthError("'--client-id' and '--client-secret-file' need to be set.")
 
     # we don't have the auth token file, but we have a client id and secret
