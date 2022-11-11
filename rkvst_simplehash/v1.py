@@ -30,7 +30,7 @@ V1_FIELDS = {
 }
 
 
-class ArchivistBadFieldError(Exception):
+class SimpleHashFieldError(Exception):
     """Incorrect field name in list() method"""
 
 class SimpleHashPendingEventFound(Exception):
@@ -102,7 +102,7 @@ def list_events(start_time, end_time, auth_token):
             try:
                 events = data["events"]
             except KeyError as ex:
-                raise ArchivistBadFieldError(f"No events found") from ex
+                raise SimpleHashFieldError(f"No events found") from ex
 
             for event in events:
                 yield event
@@ -123,9 +123,11 @@ def hash_events(start_time, end_time, auth_token):
     for event in list_events(start_time, end_time, auth_token):
 
         __check_event(event)
+
+        # only accept the correct fields on the event
         redacted_event = redact_event(event)
 
-        # bencode the events, this orders dictionary keys
+        # bencode the event, this orders dictionary keys
         bencoded_event = binary_encode(redacted_event)
 
         # add the event to the sha256 hash
