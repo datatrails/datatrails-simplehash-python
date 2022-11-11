@@ -7,11 +7,20 @@ from json import dumps as json_dumps
 from unittest import TestCase, mock
 
 from rkvst_simplehash.v1 import (
-    hash_events,
+    anchor_events,
     main,
     SimpleHashFieldMissing,
     SimpleHashPendingEventFound,
 )
+
+# The earliest timestamp_accepted in  any mock event
+MIN_ACCEPTED = "2022-10-14T09:20:51Z"
+
+# The latest timestamp_accepted in any mock event
+MAX_ACCEPTED = "2022-10-14T09:30:52Z"
+
+def add_second(timestamp, seconds=1):
+    pass
 
 VALID_EVENT = {
     "identity": (
@@ -243,7 +252,7 @@ class TestHashEventsV1(TestCase):
         """
         Test hash_events
         """
-        simplehash = hash_events(VALID_EVENTS)
+        simplehash = anchor_events(VALID_EVENTS)
         self.assertEqual(
             VALID_EVENTS_EXPECTED_HASH,
             simplehash,
