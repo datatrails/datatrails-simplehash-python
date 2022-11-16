@@ -9,13 +9,20 @@ import json
 
 class MockResponse(dict):
     def __init__(
-        self, status_code, request=None, headers=None, iter_content=None, **kwargs
+        self,
+        status_code,
+        request=None,
+        headers=None,
+        iter_content=None,
+        exception=None,
+        **kwargs
     ):
         super().__init__(**kwargs)
         self.status_code = status_code
         self._headers = headers
         self._request = request
         self._iter_content = iter_content
+        self._exception = exception
 
     @property
     def url(self):
@@ -35,6 +42,10 @@ class MockResponse(dict):
 
     def json(self):
         return self
+
+    def raise_for_status(self):
+        if self._exception is not None:
+            raise self._exception
 
     def iter_content(self, chunk_size=4096):
         return self._iter_content(chunk_size=chunk_size)

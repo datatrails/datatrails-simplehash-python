@@ -4,7 +4,8 @@ Test get_auth_token method
 
 from unittest import TestCase, mock
 
-from rkvst_simplehash.v1 import get_auth_token
+from requests import RequestException
+from rkvst_simplehash.v1 import get_auth_token, SimpleHashRequestsError
 
 from .mock_response import MockResponse
 
@@ -63,3 +64,20 @@ class TestGetAuthToken(TestCase):
             ACCESS_TOKEN,
             msg="TOKEN method called incorrectly",
         )
+
+    @mock.patch("rkvst_simplehash.v1.requests_post")
+    def test_get_auth_token_request_exception_v1(self, mock_post):
+        """
+        Test anchor_events
+        """
+
+        mock_post.return_value = MockResponse(
+            400, exception=RequestException, **RESPONSE
+        )
+
+        with self.assertRaises(SimpleHashRequestsError):
+            dummy = get_auth_token(
+                FQDN,
+                CLIENT_ID,
+                CLIENT_SECRET,
+            )
