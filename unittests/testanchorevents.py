@@ -4,11 +4,14 @@ Test anchor_events method
 
 from unittest import TestCase, mock
 
+from requests import RequestException
+
 from rkvst_simplehash.v1 import (
     anchor_events,
     SimpleHashFieldError,
     SimpleHashFieldMissing,
     SimpleHashPendingEventFound,
+    SimpleHashRequestsError,
 )
 
 from .mock_response import MockResponse
@@ -416,4 +419,16 @@ class TestHashEventsV1(TestCase):
         mock_get.return_value = MockResponse(200, **NO_CONFIRMATION_EVENTS_RESPONSE)
 
         with self.assertRaises(SimpleHashFieldMissing):
+            dummy = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)
+
+    @mock.patch("rkvst_simplehash.v1.requests_get")
+    def test_anchor_events_v1_with_requests_exception(self, mock_get):
+        """
+        Test anchor_events
+        """
+        mock_get.return_value = MockResponse(
+            200, exception=RequestException, **PENDING_EVENTS_RESPONSE
+        )
+
+        with self.assertRaises(SimpleHashRequestsError):
             dummy = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)

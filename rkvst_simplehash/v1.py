@@ -4,10 +4,14 @@
 
 import argparse
 from hashlib import sha256
+import sys
 
 from bencodepy import encode as binary_encode
+
+from requests import RequestException
 from requests import get as requests_get
 from requests import post as requests_post
+
 
 V1_FIELDS = {
     "identity",
@@ -27,20 +31,38 @@ V1_FIELDS = {
 }
 
 
-class SimpleHashClientAuthError(Exception):
+class SimpleHashError(Exception):
+    """Base exception"""
+
+
+class SimpleHashClientAuthError(SimpleHashError):
     """If either client id or secret, or both are missing"""
 
 
-class SimpleHashFieldError(Exception):
+class SimpleHashRequestsError(SimpleHashError):
+    """HTTP error from requests module"""
+
+
+class SimpleHashFieldError(SimpleHashError):
     """Incorrect field name in list() method"""
 
 
-class SimpleHashPendingEventFound(Exception):
+class SimpleHashPendingEventFound(SimpleHashError):
     """If PENDING event found"""
 
 
-class SimpleHashFieldMissing(Exception):
+class SimpleHashFieldMissing(SimpleHashError):
     """If essential field is missing"""
+
+
+def simplehash_exception_handler(
+    dummy_type, value, dummy_traceback
+):  # pylint: disable=unused-argument # pragma: no cover
+    """Suppress traceback"""
+    print(value)
+
+
+sys.excepthook = simplehash_exception_handler
 
 
 def __check_event(event):
@@ -81,7 +103,7 @@ def list_events(start_time, end_time, fqdn, auth_token, page_size):
     Returns:
         iterable that lists events
     Raises:
-        ArchivistBadFieldError: field has incorrect value.
+        SimpleHashFieldError: field has incorrect value.
     """
 
     url = f"https://{fqdn}/archivist/v2/assets/-/events"
@@ -100,6 +122,13 @@ def list_events(start_time, end_time, fqdn, auth_token, page_size):
     while True:
         timeout = 10  # seconds
         response = requests_get(url, params=params, headers=headers, timeout=timeout)
+        try:
+            response.raise_for_status()
+        except RequestException as ex:
+            raise SimpleHashRequestsError(
+                f"Error from upstream getting events {response.text}"
+            ) from ex
+
         data = response.json()
 
         try:
@@ -154,6 +183,13 @@ def get_auth_token(fqdn, client_id, client_secret):
 
     timeout = 10  # seconds
     response = requests_post(url, data=params, timeout=timeout)
+    try:
+        response.raise_for_status()
+    except RequestException as ex:
+        raise SimpleHashRequestsError(
+            f"Error from upstream getting events {response.text}"
+        ) from ex
+
     data = response.json()
 
     auth_token = data["access_token"]
