@@ -18,9 +18,9 @@ python3 -m pip install -q --force-reinstall dist/rkvst_simplehash-*.whl
 
 rkvst_simplehashv1 \
     --auth-token-file "credentials/token" \
-    --fqdn "app.rkvst-test.io" \
-    --start-time "2022-11-16T15:59:14Z" \
-    --end-time "2022-11-16T15:59:22Z"
+   --fqdn "app.rkvst.io" \
+    --start-time "2022-11-24T15:57:26Z" \
+    --end-time "2022-11-24T15:57:30Z"
 
 deactivate
 rm -rf simplehash-venv
