@@ -27,10 +27,10 @@ REDACTED_EVENT = {
         "conformance_report": "blobs/e2a1d16c-03cd-45a1-8cd0-690831df1273",
     },
     "principal_accepted": {
-        "display_name": "stunt-idp@jitsuin.com",
-        "email": "stunt-idp@jitsuin.com",
-        "issuer": "stunt-idp@jitsuin.com",
-        "subject": "stunt-idp@jitsuin.com",
+        "display_name": "joe.bloggs@rkvst.com",
+        "email": "joe.bloggs@rkvst.com",
+        "issuer": "http://server.example.com",
+        "subject": "248289761001",
     },
     "principal_declared": {
         "display_name": "",
