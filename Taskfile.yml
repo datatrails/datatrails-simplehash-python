@@ -50,6 +50,11 @@ tasks:
     cmds:
       - ./scripts/builder.sh black rkvst_simplehash unittests
 
+  functest:
+    desc: Functionality testing - requires venv
+    cmds:
+      - ./scripts/functest.sh
+
   publish:
     desc: publish wheel package (will require username and password)
     cmds:
@@ -64,6 +69,11 @@ tasks:
     desc: Run unittests
     cmds:
       - ./scripts/builder.sh ./scripts/unittests.sh
+
+  venv:
+    desc: Builds python environment - requires wheel
+    cmds:
+      - ./scripts/venv.sh
 
   wheel:
     desc: Builds python wheel package

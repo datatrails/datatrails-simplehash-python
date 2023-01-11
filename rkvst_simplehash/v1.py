@@ -255,7 +255,10 @@ def main():  # pragma: no cover
             auth_token = str(file.read()).strip("\n")
 
             anchor = anchor_events(
-                args.start_time, args.end_time, args.fqdn, auth_token
+                args.start_time,
+                args.end_time,
+                args.fqdn,
+                auth_token,
             )
             print(anchor)
             return
@@ -266,14 +269,19 @@ def main():  # pragma: no cover
         )
 
     # we don't have the auth token file, but we have a client id and secret
-    #  so attempt to get the auth token via client id and secret
+    # so attempt to get the auth token via client id and secret
     with open(args.client_secret_file, encoding="utf-8") as file:
 
         # get auth token
         client_secret = str(file.read()).strip("\n")
         auth_token = get_auth_token(args.fqdn, args.client_id, client_secret)
 
-        anchor = anchor_events(args.start_time, args.end_time, args.fqdn, auth_token)
+        anchor = anchor_events(
+            args.start_time,
+            args.end_time,
+            args.fqdn,
+            auth_token,
+        )
         print(anchor)
         return
 
