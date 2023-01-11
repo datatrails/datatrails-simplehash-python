@@ -8,8 +8,8 @@ from requests import RequestException
 from rkvst_simplehash.v1 import get_auth_token, SimpleHashRequestsError
 
 from .mock_response import MockResponse
+from .testanchorevents import API_QUERY
 
-FQDN = "app.rkvst-test.io"
 CLIENT_ID = "client_id-2f78-4fa0-9425-d59314845bc5"
 CLIENT_SECRET = "client_secret-388f5187e32d930d83"
 ACCESS_TOKEN = "access_token-xbXATAWrEpepR7TklOxRB-yud92AsD6DGGasiEGN7MZKT0AIQ4Rw9s"
@@ -41,7 +41,7 @@ class TestGetAuthToken(TestCase):
 
         mock_post.return_value = MockResponse(200, **RESPONSE)
         token = get_auth_token(
-            FQDN,
+            API_QUERY,
             CLIENT_ID,
             CLIENT_SECRET,
         )
@@ -49,7 +49,7 @@ class TestGetAuthToken(TestCase):
         self.assertEqual(
             args,
             ("https://app.rkvst-test.io/archivist/iam/v1/appidp/token",),
-            msg="CREATE method args called incorrectly",
+            msg="CREATE auth_token args called incorrectly",
         )
         self.assertEqual(
             kwargs,
@@ -77,7 +77,7 @@ class TestGetAuthToken(TestCase):
 
         with self.assertRaises(SimpleHashRequestsError):
             dummy = get_auth_token(
-                FQDN,
+                API_QUERY,
                 CLIENT_ID,
                 CLIENT_SECRET,
             )
