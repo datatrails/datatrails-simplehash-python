@@ -7,6 +7,8 @@ from unittest import TestCase, mock
 from requests import RequestException
 
 from rkvst_simplehash.v1 import (
+    DEFAULT_PAGE_SIZE,
+    TIMEOUT,
     anchor_events,
     SimpleHashFieldError,
     SimpleHashFieldMissing,
@@ -22,11 +24,19 @@ MIN_ACCEPTED = "2022-10-07 07:01:34Z"
 # The latest timestamp_accepted in any mock event
 MAX_ACCEPTED = "2022-10-16T13:14:56Z"
 
-# FQDN isn't used anywhere as the requests.get is mocked
-FQDN = "app.test.rkvst.io"
+URL = "https://app.rkvst-test.io"
+PATH = "archivist/v2/assets/-/events"
+API_QUERY = (
+    f"{URL}/{PATH}"
+    "?proof_mechanism=SIMPLE_HASH"
+    f"&timestamp_accepted_since={MIN_ACCEPTED}"
+    f"&timestamp_accepted_before={MAX_ACCEPTED}"
+    "&order_by=SIMPLEHASHV1"
+)
 
-# AUTH_TOKEN isn't used anywhere as the requests.get is mocked
+# dummy auth token
 AUTH_TOKEN = "dummy auth"
+PAGE_SIZE = 1
 
 
 VALID_EVENTS = [
@@ -286,7 +296,7 @@ class TestHashEventsV1(TestCase):
 
         mock_get.return_value = MockResponse(200, **VALID_EVENTS_RESPONSE)
 
-        simplehash = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)
+        simplehash = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
         self.assertEqual(
             VALID_EVENTS_EXPECTED_HASH,
             simplehash,
@@ -297,20 +307,14 @@ class TestHashEventsV1(TestCase):
         self.assertEqual(
             tuple(mock_get.call_args),
             (
-                ("https://app.test.rkvst.io/archivist/v2/assets/-/events",),
+                (f"{API_QUERY}&page_size={DEFAULT_PAGE_SIZE}",),
                 {
                     "headers": {
                         "Content-Type": "application/json",
                         "Authorization": "Bearer dummy auth",
                     },
-                    "params": {
-                        "order_by": "SIMPLEHASHV1",
-                        "page_size": 10,
-                        "proof_mechanism": "SIMPLE_HASH",
-                        "timestamp_accepted_before": "2022-10-16T13:14:56Z",
-                        "timestamp_accepted_since": "2022-10-07 07:01:34Z",
-                    },
-                    "timeout": 10,
+                    "params": None,
+                    "timeout": TIMEOUT,
                 },
             ),
             msg="GET method called incorrectly",
@@ -323,13 +327,7 @@ class TestHashEventsV1(TestCase):
         """
         page_size = 1
         params = [
-            {
-                "order_by": "SIMPLEHASHV1",
-                "page_size": page_size,
-                "proof_mechanism": "SIMPLE_HASH",
-                "timestamp_accepted_before": "2022-10-16T13:14:56Z",
-                "timestamp_accepted_since": "2022-10-07 07:01:34Z",
-            },
+            None,
             {"page_token": "next_page_token"},
         ]
         mock_get.side_effect = (
@@ -341,7 +339,7 @@ class TestHashEventsV1(TestCase):
 
         # should be same result as unpaged test
         simplehash = anchor_events(
-            MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN, page_size=page_size
+            API_QUERY, auth_token=AUTH_TOKEN, page_size=page_size
         )
         self.assertEqual(
             VALID_EVENTS_EXPECTED_HASH,
@@ -354,14 +352,14 @@ class TestHashEventsV1(TestCase):
             self.assertEqual(
                 tuple(a),
                 (
-                    ("https://app.test.rkvst.io/archivist/v2/assets/-/events",),
+                    (f"{API_QUERY}&page_size={PAGE_SIZE}",),
                     {
                         "headers": {
                             "Content-Type": "application/json",
                             "Authorization": "Bearer dummy auth",
                         },
                         "params": params[i],
-                        "timeout": 10,
+                        "timeout": TIMEOUT,
                     },
                 ),
                 msg="GET method called incorrectly",
@@ -375,7 +373,7 @@ class TestHashEventsV1(TestCase):
         mock_get.return_value = MockResponse(200, **PENDING_EVENTS_RESPONSE)
 
         with self.assertRaises(SimpleHashPendingEventFound):
-            dummy = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)
+            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
     @mock.patch("rkvst_simplehash.v1.requests_get")
     def test_anchor_events_v1_with_no_events(self, mock_get):
@@ -384,7 +382,7 @@ class TestHashEventsV1(TestCase):
         """
         mock_get.return_value = MockResponse(200, **NO_EVENTS_RESPONSE)
 
-        simplehash = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)
+        simplehash = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
         self.assertEqual(
             NO_EVENTS_EXPECTED_HASH,
             simplehash,
@@ -399,7 +397,7 @@ class TestHashEventsV1(TestCase):
         mock_get.return_value = MockResponse(200)
 
         with self.assertRaises(SimpleHashFieldError):
-            dummy = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)
+            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
     @mock.patch("rkvst_simplehash.v1.requests_get")
     def test_anchor_events_v1_with_incomplete_event(self, mock_get):
@@ -409,7 +407,7 @@ class TestHashEventsV1(TestCase):
         mock_get.return_value = MockResponse(200, **INCOMPLETE_EVENTS_RESPONSE)
 
         with self.assertRaises(SimpleHashFieldMissing):
-            dummy = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)
+            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
     @mock.patch("rkvst_simplehash.v1.requests_get")
     def test_anchor_events_v1_with_no_confirmation_status(self, mock_get):
@@ -419,7 +417,7 @@ class TestHashEventsV1(TestCase):
         mock_get.return_value = MockResponse(200, **NO_CONFIRMATION_EVENTS_RESPONSE)
 
         with self.assertRaises(SimpleHashFieldMissing):
-            dummy = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)
+            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
     @mock.patch("rkvst_simplehash.v1.requests_get")
     def test_anchor_events_v1_with_requests_exception(self, mock_get):
@@ -431,4 +429,4 @@ class TestHashEventsV1(TestCase):
         )
 
         with self.assertRaises(SimpleHashRequestsError):
-            dummy = anchor_events(MIN_ACCEPTED, MAX_ACCEPTED, FQDN, AUTH_TOKEN)
+            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)

@@ -5,6 +5,7 @@
 import argparse
 from hashlib import sha256
 import sys
+from urllib.parse import urlparse, urlunparse
 
 from bencodepy import encode as binary_encode
 
@@ -12,6 +13,8 @@ from requests import RequestException
 from requests import get as requests_get
 from requests import post as requests_post
 
+DEFAULT_PAGE_SIZE = 10
+TIMEOUT = 30
 
 V1_FIELDS = {
     "identity",
@@ -86,7 +89,7 @@ def redact_event(event):
     return {k: event[k] for k in V1_FIELDS}
 
 
-def list_events(start_time, end_time, fqdn, auth_token, page_size):
+def list_events(api_query, auth_token, page_size):
     """GET method (REST) with params string
     Lists events that match the params dictionary.
     If page size is specified return the list of records in batches of page_size
@@ -94,10 +97,7 @@ def list_events(start_time, end_time, fqdn, auth_token, page_size):
     If page size is unspecified return up to the internal limit of records.
     (different for each endpoint)
     Args:
-        start_time (string): rfc3339 formatted datetime string of the start date of the time window
-                             of events
-        end_time (string): rfc3339 formatted datetime string of the end date of the time window of
-                           events
+        api_query (string): The api_query as returned from the simplehashed event response.
         auth_token (string): authorization token to be able to call the list events api
         page_size (int): page_size
     Returns:
@@ -106,22 +106,19 @@ def list_events(start_time, end_time, fqdn, auth_token, page_size):
         SimpleHashFieldError: field has incorrect value.
     """
 
-    url = f"https://{fqdn}/archivist/v2/assets/-/events"
-    params = {
-        "proof_mechanism": "SIMPLE_HASH",
-        "timestamp_accepted_since": start_time,
-        "timestamp_accepted_before": end_time,
-        "page_size": page_size,
-        "order_by": "SIMPLEHASHV1",
-    }
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {auth_token}",
     }
+    if auth_token:
+        headers["Authorization"] = f"Bearer {auth_token}"
+    if page_size:
+        api_query += f"&page_size={page_size}"
 
+    params = None
     while True:
-        timeout = 10  # seconds
-        response = requests_get(url, params=params, headers=headers, timeout=timeout)
+        response = requests_get(
+            api_query, headers=headers, params=params, timeout=TIMEOUT
+        )
         try:
             response.raise_for_status()
         except RequestException as ex:
@@ -146,13 +143,13 @@ def list_events(start_time, end_time, fqdn, auth_token, page_size):
         params = {"page_token": page_token}
 
 
-def anchor_events(start_time, end_time, fqdn, auth_token, page_size=10):
+def anchor_events(api_query, auth_token=None, page_size=DEFAULT_PAGE_SIZE):
     """Generate Simplehash for a given set of events canonicalizing then hashing"""
 
     hasher = sha256()
 
     # for each event
-    for event in list_events(start_time, end_time, fqdn, auth_token, page_size):
+    for event in list_events(api_query, auth_token, page_size):
 
         __check_event(event)
 
@@ -169,12 +166,15 @@ def anchor_events(start_time, end_time, fqdn, auth_token, page_size=10):
     return hasher.hexdigest()
 
 
-def get_auth_token(fqdn, client_id, client_secret):
+def get_auth_token(api_query, client_id, client_secret):
     """
     get_auth_token gets an auth token from an app registration, given its client id and secret
     """
 
-    url = f"https://{fqdn}/archivist/iam/v1/appidp/token"
+    fqdn = urlparse(api_query)
+    url = urlunparse(
+        (fqdn.scheme, fqdn.netloc, "archivist/iam/v1/appidp/token", "", "", "")
+    )
     params = {
         "grant_type": "client_credentials",
         "client_id": client_id,
@@ -202,27 +202,9 @@ def main():  # pragma: no cover
     parser = argparse.ArgumentParser(description="Create simple hash anchor.")
 
     parser.add_argument(
-        "--start-time",
+        "--api-query",
         type=str,
-        help=(
-            "the start time of the time window to anchor events, formatted as an rfc3339 "
-            "formatted datetime string."
-        ),
-    )
-    parser.add_argument(
-        "--end-time",
-        type=str,
-        help=(
-            "the end time of the time window to anchor events, formatted as an rfc3339 "
-            "formatted datetime string."
-        ),
-    )
-
-    parser.add_argument(
-        "--fqdn",
-        type=str,
-        help="the fqdn for the url to list the events in the anchor time window",
-        default="app.rkvst.io",
+        help=("the api query string in the asset event response."),
     )
 
     # auth
@@ -248,6 +230,7 @@ def main():  # pragma: no cover
     )
     args = parser.parse_args()
 
+    auth_token = None
     if args.auth_token_file:
         with open(args.auth_token_file, encoding="utf-8") as file:
 
@@ -255,10 +238,8 @@ def main():  # pragma: no cover
             auth_token = str(file.read()).strip("\n")
 
             anchor = anchor_events(
-                args.start_time,
-                args.end_time,
-                args.fqdn,
-                auth_token,
+                args.api_query,
+                auth_token=auth_token,
             )
             print(anchor)
             return
@@ -274,13 +255,11 @@ def main():  # pragma: no cover
 
         # get auth token
         client_secret = str(file.read()).strip("\n")
-        auth_token = get_auth_token(args.fqdn, args.client_id, client_secret)
+        auth_token = get_auth_token(args.api_query, args.client_id, client_secret)
 
         anchor = anchor_events(
-            args.start_time,
-            args.end_time,
-            args.fqdn,
-            auth_token,
+            args.api_query,
+            auth_token=auth_token,
         )
         print(anchor)
         return

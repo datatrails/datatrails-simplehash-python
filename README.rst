@@ -63,7 +63,7 @@ Permissioned Assets
     # if any of the events do not contain the required field then a SimpleHashFieldMissing error will be thrown
     api_query = (
         "https://app.rkvst.io"
-        "archivist/v2/assets/-/events"
+        "/archivist/v2/assets/-/events"
         "?page_size=50"
         "&proof_mechanism=SIMPLE_HASH"
         "&timestamp_accepted_since=2022-10-07 07:01:34Z"
@@ -96,7 +96,7 @@ Public Assets
     # if any of the events do not contain the required field then a SimpleHashFieldMissing error will be thrown
     api_query = (
         "https://app.rkvst.io"
-        "archivist/v2/publicassets/-/events"
+        "/archivist/v2/publicassets/-/events"
         "?page_size=50"
         "&proof_mechanism=SIMPLE_HASH"
         "&timestamp_accepted_since=2022-10-07 07:01:34Z"
@@ -135,7 +135,7 @@ Using an auth token directly and for permissioned assets
     python3 -m pip install -q rkvst_simplehash
     
     api_query="https://app.rkvst.io"
-    api_query+="archivist/v2/assets/-/events"
+    api_query+="/archivist/v2/assets/-/events"
     api_query+="?page_size=50"
     api_query+="&proof_mechanism=SIMPLE_HASH"
     api_query+="&timestamp_accepted_since=2022-10-07 07:01:34Z"
@@ -161,7 +161,7 @@ Using a client id and secret and for permissioned assets
     python3 -m pip install -q rkvst_simplehash
     
     api_query="https://app.rkvst.io"
-    api_query+="archivist/v2/assets/-/events"
+    api_query+="/archivist/v2/assets/-/events"
     api_query+="?page_size=50"
     api_query+="&proof_mechanism=SIMPLE_HASH"
     api_query+="&timestamp_accepted_since=2022-10-07 07:01:34Z"
@@ -194,7 +194,7 @@ Querying the public assets (does not require authentication)
     endpoint = "archivist/v2/publicassets/-/events"
     
     api_query="https://app.rkvst.io"
-    api_query+="archivist/v2/publicassets/-/events"
+    api_query+="/archivist/v2/publicassets/-/events"
     api_query+="?page_size=50"
     api_query+="&proof_mechanism=SIMPLE_HASH"
     api_query+="&timestamp_accepted_since=2022-10-07 07:01:34Z"
