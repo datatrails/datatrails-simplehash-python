@@ -3,8 +3,6 @@
 """ Module for implementation of simplehash canonicalization"""
 
 import argparse
-from copy import deepcopy
-
 from hashlib import sha256
 import sys
 from urllib.parse import urlparse, urlunparse
@@ -18,7 +16,7 @@ from requests import post as requests_post
 DEFAULT_PAGE_SIZE = 10
 TIMEOUT = 30
 
-V1_FIELDS = {
+V2_FIELDS = {
     "identity",
     "asset_identity",
     "event_attributes",
@@ -74,7 +72,7 @@ def __check_event(event):
     """Raise exception if any PENDING events found or
     if required keys are missing"""
 
-    missing = V1_FIELDS.difference(event)
+    missing = V2_FIELDS.difference(event)
     if missing:
         raise SimpleHashFieldMissing(
             f"Event Identity {event['identity']} has missing field(s) {missing}"
@@ -86,24 +84,9 @@ def __check_event(event):
         )
 
 
-def ensure_permissioned_identities(event):
-    """
-    Ensure the identities of the event are in the permissioned form
-       `assets/{uuid}/events/{uuid}`, even if the event is public.
-    """
-    event_copy = deepcopy(event)
-
-    event_copy["identity"] = event["identity"].replace("publicassets/", "assets/")
-    event_copy["asset_identity"] = event["asset_identity"].replace(
-        "publicassets/", "assets/"
-    )
-
-    return event_copy
-
-
 def redact_event(event):
     """Form an event only containing necessary fields"""
-    return {k: event[k] for k in V1_FIELDS}
+    return {k: event[k] for k in V2_FIELDS}
 
 
 def __list_events(api_query, auth_token, page_size):
@@ -168,9 +151,6 @@ def anchor_events(api_query, auth_token=None, page_size=DEFAULT_PAGE_SIZE):
     for event in __list_events(api_query, auth_token, page_size):
 
         __check_event(event)
-
-        # ensure we have only permissioned identities for v1
-        event = ensure_permissioned_identities(event)
 
         # only accept the correct fields on the event
         redacted_event = redact_event(event)

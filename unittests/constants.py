@@ -90,6 +90,67 @@ VALID_EVENTS = [
     },
 ]
 
+VALID_PUBLIC_EVENTS = [
+    {
+        "identity": (
+            "publicassets/03c60f22-588c-4f12-b3c2-e98c7f2e98a0/"
+            "events/409ae05a-183d-4e55-8aa6-889159edefd3"
+        ),
+        "asset_identity": "publicassets/03c60f22-588c-4f12-b3c2-e98c7f2e98a0",
+        "event_attributes": {"foo": "bar"},
+        "asset_attributes": {"fab": "baz"},
+        "operation": "Record",
+        "behaviour": "RecordEvidence",
+        "timestamp_declared": "2022-10-16T13:14:50Z",
+        "timestamp_accepted": "2022-10-16T13:14:55Z",
+        "timestamp_committed": "2022-10-16T13:14:59Z",
+        "principal_declared": {
+            "issuer": "https://rkvt.com",
+            "subject": "117303158125148247777",
+            "display_name": "William Defoe",
+            "email": "WilliamDefoe@rkvst.com",
+        },
+        "principal_accepted": {
+            "issuer": "https://rkvt.com",
+            "subject": "117303158125148247777",
+            "display_name": "William Defoe",
+            "email": "WilliamDefoe@rkvst.com",
+        },
+        "confirmation_status": "CONFIRMED",
+        "from": "0xf8dfc073650503aeD429E414bE7e972f8F095e70",
+        "tenant_identity": "tenant/0684984b-654d-4301-ad10-a508126e187d",
+    },
+    {
+        "identity": (
+            "publicassets/a987b910-f567-4cca-9869-bbbeb12aec20/"
+            "events/936ba508-ee65-426d-8903-52c59cb4655b"
+        ),
+        "asset_identity": "publicassets/a987b910-f567-4cca-9869-bbbeb12aec20",
+        "event_attributes": {"make": "volvo"},
+        "asset_attributes": {"vehicle": "car"},
+        "operation": "Record",
+        "behaviour": "RecordEvidence",
+        "timestamp_declared": "2022-10-07T07:01:30Z",
+        "timestamp_accepted": "2022-10-07T07:01:35Z",
+        "timestamp_committed": "2022-10-07T07:01:39Z",
+        "principal_declared": {
+            "issuer": "https://rkvt.com",
+            "subject": "227303158125148248888",
+            "display_name": "John Cena",
+            "email": "JohnCena@rkvst.com",
+        },
+        "principal_accepted": {
+            "issuer": "https://rkvt.com",
+            "subject": "227303158125148248888",
+            "display_name": "John Cena",
+            "email": "JohnCena@rkvst.com",
+        },
+        "confirmation_status": "CONFIRMED",
+        "from": "0xa453a973650503aeD429E414bE7e972f8F095f81",
+        "tenant_identity": "tenant/0684984b-654d-4301-ad10-a508126e187d",
+    },
+]
+
 
 VALID_EVENT = {
     "identity": (
@@ -269,11 +330,16 @@ REDACTED_EVENT = {
 # these are deliberately in the wrong order sorted bu=y identity
 # so we can check the redact_sorted_events() function reorders them
 VALID_EVENTS_RESPONSE = {"events": VALID_EVENTS}
+VALID_PUBLIC_EVENTS_RESPONSE = {"events": VALID_PUBLIC_EVENTS}
 VALID_EVENT0_RESPONSE = {"events": [VALID_EVENTS[0]]}
 VALID_EVENT1_RESPONSE = {"events": [VALID_EVENTS[1]]}
 
 VALID_EVENTS_EXPECTED_HASH = (
     "61211c916cd113a1cf424ac729924de46aa6259919825dbdf8ec78c5c14665e2"
+)
+
+VALID_PUBLIC_EVENTS_EXPECTED_HASH = (
+    "63ab884c8d59d0f508c3f5f90c6bc175eb173c8d8ec12aa811e3b084543c1b4f"
 )
 
 NO_EVENTS_EXPECTED_HASH = (
