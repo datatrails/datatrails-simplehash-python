@@ -8,7 +8,7 @@ from requests import RequestException
 from rkvst_simplehash.v1 import get_auth_token, SimpleHashRequestsError
 
 from .mock_response import MockResponse
-from .testanchorevents import API_QUERY
+from .testanchoreventsv1 import API_QUERY
 
 CLIENT_ID = "client_id-2f78-4fa0-9425-d59314845bc5"
 CLIENT_SECRET = "client_secret-388f5187e32d930d83"
@@ -26,7 +26,7 @@ RESPONSE = {
 }
 
 
-class TestGetAuthToken(TestCase):
+class TestGetAuthTokenV1(TestCase):
     """
     Test get_auth_token
     """

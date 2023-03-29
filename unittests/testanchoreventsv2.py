@@ -6,15 +6,16 @@ from unittest import TestCase, mock
 
 from requests import RequestException
 
-from rkvst_simplehash.v1 import (
+from rkvst_simplehash.v2 import (
     DEFAULT_PAGE_SIZE,
     TIMEOUT,
-    anchor_events,
     SimpleHashFieldError,
     SimpleHashFieldMissing,
     SimpleHashPendingEventFound,
     SimpleHashRequestsError,
 )
+
+from rkvst_simplehash import v2
 
 from .mock_response import MockResponse
 
@@ -23,9 +24,11 @@ from .constants import (
     API_QUERY_PUBLIC,
     AUTH_TOKEN,
     VALID_EVENTS_RESPONSE,
+    VALID_PUBLIC_EVENTS_RESPONSE,
     VALID_EVENT0_RESPONSE,
     VALID_EVENT1_RESPONSE,
     VALID_EVENTS_EXPECTED_HASH,
+    VALID_PUBLIC_EVENTS_EXPECTED_HASH,
     NO_EVENTS_EXPECTED_HASH,
     PENDING_EVENTS_RESPONSE,
     INCOMPLETE_EVENTS_RESPONSE,
@@ -34,22 +37,22 @@ from .constants import (
 )
 
 
-class TestHashEventsV1(TestCase):
+class TestHashEventsV2(TestCase):
     """
-    Test anchor_events
+    Test anchor_events for v2 schema
     """
 
     maxDiff = None
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v2(self, mock_get):
         """
         Test anchor_events
         """
 
         mock_get.return_value = MockResponse(200, **VALID_EVENTS_RESPONSE)
 
-        simplehash = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
+        simplehash = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
         self.assertEqual(
             VALID_EVENTS_EXPECTED_HASH,
             simplehash,
@@ -73,17 +76,17 @@ class TestHashEventsV1(TestCase):
             msg="GET method called incorrectly",
         )
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1_public(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v2_public(self, mock_get):
         """
         Test anchor_events
         """
 
-        mock_get.return_value = MockResponse(200, **VALID_EVENTS_RESPONSE)
+        mock_get.return_value = MockResponse(200, **VALID_PUBLIC_EVENTS_RESPONSE)
 
-        simplehash = anchor_events(API_QUERY_PUBLIC)
+        simplehash = v2.anchor_events(API_QUERY_PUBLIC)
         self.assertEqual(
-            VALID_EVENTS_EXPECTED_HASH,
+            VALID_PUBLIC_EVENTS_EXPECTED_HASH,
             simplehash,
             msg="Hash has incorrect value",
         )
@@ -104,8 +107,8 @@ class TestHashEventsV1(TestCase):
             msg="GET method called incorrectly",
         )
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1_paging(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v2_paging(self, mock_get):
         """
         Test anchor_events
         """
@@ -122,7 +125,7 @@ class TestHashEventsV1(TestCase):
         )
 
         # should be same result as unpaged test
-        simplehash = anchor_events(
+        simplehash = v2.anchor_events(
             API_QUERY, auth_token=AUTH_TOKEN, page_size=page_size
         )
         self.assertEqual(
@@ -149,62 +152,62 @@ class TestHashEventsV1(TestCase):
                 msg="GET method called incorrectly",
             )
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1_with_pending_event(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v_with_pending_event(self, mock_get):
         """
         Test anchor_events
         """
         mock_get.return_value = MockResponse(200, **PENDING_EVENTS_RESPONSE)
 
         with self.assertRaises(SimpleHashPendingEventFound):
-            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
+            dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1_with_no_events(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v2_with_no_events(self, mock_get):
         """
         Test anchor_events with no events
         """
         mock_get.return_value = MockResponse(200, **NO_EVENTS_RESPONSE)
 
-        simplehash = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
+        simplehash = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
         self.assertEqual(
             NO_EVENTS_EXPECTED_HASH,
             simplehash,
             msg="Hash has incorrect value",
         )
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1_with_missing_events(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v2_with_missing_events(self, mock_get):
         """
         Test anchor_events with missing events
         """
         mock_get.return_value = MockResponse(200)
 
         with self.assertRaises(SimpleHashFieldError):
-            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
+            dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1_with_incomplete_event(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v2_with_incomplete_event(self, mock_get):
         """
         Test anchor_events with incomplete event
         """
         mock_get.return_value = MockResponse(200, **INCOMPLETE_EVENTS_RESPONSE)
 
         with self.assertRaises(SimpleHashFieldMissing):
-            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
+            dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1_with_no_confirmation_status(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v2_with_no_confirmation_status(self, mock_get):
         """
         Test anchor_events with no confirmation status
         """
         mock_get.return_value = MockResponse(200, **NO_CONFIRMATION_EVENTS_RESPONSE)
 
         with self.assertRaises(SimpleHashFieldMissing):
-            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
+            dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
-    @mock.patch("rkvst_simplehash.v1.requests_get")
-    def test_anchor_events_v1_with_requests_exception(self, mock_get):
+    @mock.patch("rkvst_simplehash.v2.requests_get")
+    def test_anchor_events_v2_with_requests_exception(self, mock_get):
         """
         Test anchor_events
         """
@@ -213,4 +216,4 @@ class TestHashEventsV1(TestCase):
         )
 
         with self.assertRaises(SimpleHashRequestsError):
-            dummy = anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
+            dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
