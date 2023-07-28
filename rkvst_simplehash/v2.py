@@ -149,7 +149,6 @@ def anchor_events(api_query, auth_token=None, page_size=DEFAULT_PAGE_SIZE):
 
     # for each event
     for event in __list_events(api_query, auth_token, page_size):
-
         __check_event(event)
 
         # only accept the correct fields on the event
