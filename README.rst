@@ -9,7 +9,7 @@ Prescribed python code that defines the hashing algorithm for DLT Anchoring.
 Support
 =========
 
-This package currently is tested against Python versions 3.8,3.9, 3.10 and 3.11.
+This package currently is tested against Python versions 3.8,3.9,3.10,3.11 and 3.12.
 
 The current default version is 3.8 - this means that this package will not
 use any features specific to versions 3.8 and later.

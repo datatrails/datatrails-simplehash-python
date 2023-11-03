@@ -27,6 +27,11 @@ tasks:
     cmds:
       - ./scripts/build.sh "3.11"
 
+  builder-3.12:
+    desc: Build a docker environment with the right dependencies and utilities
+    cmds:
+      - ./scripts/build.sh "3.12"
+
   check:
     desc: Check the style, bug and quality of the code
     cmds:
