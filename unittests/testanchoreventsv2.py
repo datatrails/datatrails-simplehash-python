@@ -6,7 +6,7 @@ from unittest import TestCase, mock
 
 from requests import RequestException
 
-from rkvst_simplehash.v2 import (
+from datatrails_simplehash.v2 import (
     DEFAULT_PAGE_SIZE,
     TIMEOUT,
     SimpleHashFieldError,
@@ -15,7 +15,7 @@ from rkvst_simplehash.v2 import (
     SimpleHashRequestsError,
 )
 
-from rkvst_simplehash import v2
+from datatrails_simplehash import v2
 
 from .mock_response import MockResponse
 
@@ -44,7 +44,7 @@ class TestHashEventsV2(TestCase):
 
     maxDiff = None
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v2(self, mock_get):
         """
         Test anchor_events
@@ -76,7 +76,7 @@ class TestHashEventsV2(TestCase):
             msg="GET method called incorrectly",
         )
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v2_public(self, mock_get):
         """
         Test anchor_events
@@ -107,7 +107,7 @@ class TestHashEventsV2(TestCase):
             msg="GET method called incorrectly",
         )
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v2_paging(self, mock_get):
         """
         Test anchor_events
@@ -152,7 +152,7 @@ class TestHashEventsV2(TestCase):
                 msg="GET method called incorrectly",
             )
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v_with_pending_event(self, mock_get):
         """
         Test anchor_events
@@ -162,7 +162,7 @@ class TestHashEventsV2(TestCase):
         with self.assertRaises(SimpleHashPendingEventFound):
             dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v2_with_no_events(self, mock_get):
         """
         Test anchor_events with no events
@@ -176,7 +176,7 @@ class TestHashEventsV2(TestCase):
             msg="Hash has incorrect value",
         )
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v2_with_missing_events(self, mock_get):
         """
         Test anchor_events with missing events
@@ -186,7 +186,7 @@ class TestHashEventsV2(TestCase):
         with self.assertRaises(SimpleHashFieldError):
             dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v2_with_incomplete_event(self, mock_get):
         """
         Test anchor_events with incomplete event
@@ -196,7 +196,7 @@ class TestHashEventsV2(TestCase):
         with self.assertRaises(SimpleHashFieldMissing):
             dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v2_with_no_confirmation_status(self, mock_get):
         """
         Test anchor_events with no confirmation status
@@ -206,7 +206,7 @@ class TestHashEventsV2(TestCase):
         with self.assertRaises(SimpleHashFieldMissing):
             dummy = v2.anchor_events(API_QUERY, auth_token=AUTH_TOKEN)
 
-    @mock.patch("rkvst_simplehash.v2.requests_get")
+    @mock.patch("datatrails_simplehash.v2.requests_get")
     def test_anchor_events_v2_with_requests_exception(self, mock_get):
         """
         Test anchor_events

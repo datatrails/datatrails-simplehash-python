@@ -5,7 +5,7 @@ Test get_auth_token method
 from unittest import TestCase, mock
 
 from requests import RequestException
-from rkvst_simplehash.v1 import get_auth_token, SimpleHashRequestsError
+from datatrails_simplehash.v1 import get_auth_token, SimpleHashRequestsError
 
 from .mock_response import MockResponse
 from .testanchoreventsv1 import API_QUERY
@@ -33,7 +33,7 @@ class TestGetAuthTokenV1(TestCase):
 
     maxDiff = None
 
-    @mock.patch("rkvst_simplehash.v1.requests_post")
+    @mock.patch("datatrails_simplehash.v1.requests_post")
     def test_get_auth_token_v1(self, mock_post):
         """
         Test anchor_events
@@ -48,7 +48,7 @@ class TestGetAuthTokenV1(TestCase):
         args, kwargs = mock_post.call_args
         self.assertEqual(
             args,
-            ("https://app.rkvst-test.io/archivist/iam/v1/appidp/token",),
+            ("https://app.datatrails-test.ai/archivist/iam/v1/appidp/token",),
             msg="CREATE auth_token args called incorrectly",
         )
         self.assertEqual(
@@ -65,7 +65,7 @@ class TestGetAuthTokenV1(TestCase):
             msg="TOKEN method called incorrectly",
         )
 
-    @mock.patch("rkvst_simplehash.v1.requests_post")
+    @mock.patch("datatrails_simplehash.v1.requests_post")
     def test_get_auth_token_request_exception_v1(self, mock_post):
         """
         Test anchor_events

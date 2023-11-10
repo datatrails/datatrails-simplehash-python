@@ -27,9 +27,9 @@ jobs:
       shell: bash
     - name: Run integrity checks
       run: |
-        pycodestyle --format=pylint rkvst_simplehash unittests
-        python3 -m pylint rkvst_simplehash unittests
-        black rkvst_simplehash unittests
+        pycodestyle --format=pylint datatrails_simplehash unittests
+        python3 -m pylint datatrails_simplehash unittests
+        black datatrails_simplehash unittests
         modified=$(git status -s | wc -l)
         if [ $modified -gt 0 ]
         then
@@ -39,6 +39,6 @@ jobs:
         ./scripts/unittests.sh
         rm -f coverage.xml
         rm -rf htmlcov
-        coverage run --branch --source rkvst_simplehash -m unittest -v
+        coverage run --branch --source datatrails_simplehash -m unittest -v
       shell: bash
 

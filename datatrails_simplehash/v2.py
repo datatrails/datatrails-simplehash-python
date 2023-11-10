@@ -224,7 +224,11 @@ def main():  # pragma: no cover
     parser.add_argument(
         "api_query",
         type=str,
-        help=("the api query string in the asset event response."),
+        help=(
+            "the api query string in the blockchain response."
+            " In quotes. e.g. "
+            '"https://app.datatrails.ai/archivist/v2/publicassets/-/events?order_by=SIMPLEHASHV2"'
+        ),
     )
 
     args = parser.parse_args()
