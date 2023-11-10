@@ -8,7 +8,7 @@ MIN_ACCEPTED = "2022-10-07 07:01:34Z"
 # The latest timestamp_accepted in any mock event
 MAX_ACCEPTED = "2022-10-16T13:14:56Z"
 
-URL = "https://app.rkvst-test.io"
+URL = "https://app.datatrails-test.ai"
 PATH = "archivist/v2/assets/-/events"
 PUBLICPATH = "archivist/v2/publicassets/-/events"
 API_QUERY = (

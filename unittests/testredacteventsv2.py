@@ -5,7 +5,7 @@ Test redact_sorted_events method
 from unittest import TestCase
 
 
-from rkvst_simplehash.v2 import (
+from datatrails_simplehash.v2 import (
     redact_event,
 )
 

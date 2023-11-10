@@ -36,8 +36,8 @@ tasks:
     desc: Check the style, bug and quality of the code
     cmds:
       - ./scripts/builder.sh python3 --version
-      - ./scripts/builder.sh pycodestyle --format=pylint rkvst_simplehash unittests
-      - ./scripts/builder.sh python3 -m pylint rkvst_simplehash unittests
+      - ./scripts/builder.sh pycodestyle --format=pylint datatrails_simplehash unittests
+      - ./scripts/builder.sh python3 -m pylint datatrails_simplehash unittests
 
   clean:
     desc: Clean git repo
@@ -48,7 +48,7 @@ tasks:
   format:
     desc: Format code using black
     cmds:
-      - ./scripts/builder.sh black rkvst_simplehash unittests
+      - ./scripts/builder.sh black datatrails_simplehash unittests
 
   functest:
     desc: Functionality testing - requires venv
