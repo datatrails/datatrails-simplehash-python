@@ -226,8 +226,8 @@ def main():  # pragma: no cover
         type=str,
         help=(
             "the api query string in the blockchain response."
-            "In quotes. e.g. "
-            "\"https://app.datatrails.ai/archivist/v2/publicassets/-/events?order_by=SIMPLEHASHV2\""
+            " In quotes. e.g. "
+            '"https://app.datatrails.ai/archivist/v2/publicassets/-/events?order_by=SIMPLEHASHV2"'
         ),
     )
 
